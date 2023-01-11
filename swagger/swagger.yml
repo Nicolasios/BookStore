@@ -11,6 +11,121 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /book/:
+    get:
+      tags:
+      - book
+      description: get Book
+      operationId: BookController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Book'
+        "403":
+          description: ""
+    post:
+      tags:
+      - book
+      description: create Book
+      operationId: BookController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for Book content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Book'
+      responses:
+        "201":
+          description: '{int} models.Book'
+        "403":
+          description: body is empty
+  /book/{id}:
+    get:
+      tags:
+      - book
+      description: get Book by id
+      operationId: BookController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Book'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - book
+      description: update the Book
+      operationId: BookController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for Book content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Book'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Book'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - book
+      description: delete the Book
+      operationId: BookController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
   /user/:
     get:
       tags:
@@ -127,6 +242,27 @@ paths:
         "403":
           description: id is empty
 definitions:
+  models.Book:
+    title: Book
+    type: object
+    properties:
+      BookAvator:
+        type: string
+      BookCatalog:
+        type: string
+      BookName:
+        type: string
+      BookPrice:
+        type: number
+        format: double
+      BookSize:
+        type: number
+        format: double
+      BookUrl:
+        type: string
+      Id:
+        type: integer
+        format: int64
   models.User:
     title: User
     type: object
@@ -136,7 +272,6 @@ definitions:
         format: int64
       LastLoginTime:
         type: string
-        format: datetime
       UserAge:
         type: integer
         format: int32
@@ -147,7 +282,6 @@ definitions:
         type: string
       UserBirthday:
         type: string
-        format: datetime
       UserGender:
         type: integer
         format: int32
@@ -159,8 +293,10 @@ definitions:
         type: string
       UserRegisterTime:
         type: string
-        format: datetime
 tags:
 - name: user
   description: |
     UserController operations for User
+- name: book
+  description: |
+    BookController operations for Book

@@ -10,7 +10,13 @@ import (
 )
 
 type Book struct {
-	Id int64
+	Id          int64 `orm:"auto"`
+	BookName    string
+	BookCatalog string
+	BookAvator  string
+	BookPrice   float64 `orm:"digits(10);decimals(2)"`
+	BookUrl     string
+	BookSize    float64 `orm:"digits(10);decimals(2)"`
 }
 
 func init() {

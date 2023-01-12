@@ -23,6 +23,14 @@ func init() {
 	orm.RegisterModel(new(Book))
 }
 
+func (b *Book) TableName() string {
+	return "book"
+}
+
+func (b *Book) TableEngine() string {
+	return "INNODB"
+}
+
 // AddBook insert a new Book into database and returns
 // last inserted Id on success.
 func AddBook(m *Book) (id int64, err error) {

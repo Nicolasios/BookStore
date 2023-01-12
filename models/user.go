@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/astaxie/beego/orm"
 )
@@ -14,13 +15,13 @@ type User struct {
 	UserName         string
 	UserPassword     string
 	UserAuth         int8
-	LastLoginTime    string `orm:"type(datetime)"`
+	LastLoginTime    time.Time
 	UserAvator       string
 	UserAge          int8
 	UserGender       int8
 	UserInterests    string
-	UserRegisterTime string `orm:"type(date)"`
-	UserBirthday     string `orm:"type(date)"`
+	UserRegisterTime time.Time `orm:"type(date)"`
+	UserBirthday     time.Time `orm:"type(date)"`
 }
 
 func init() {

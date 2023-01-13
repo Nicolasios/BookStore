@@ -4,7 +4,6 @@ import (
 	"BookStore/models"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -34,11 +33,13 @@ func (c *UserController) URLMapping() {
 // @router / [post]
 func (c *UserController) Post() {
 	var v models.User
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	fmt.Println(v.LastLoginTime)
-	if _, err := models.AddUser(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddUser(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -54,7 +55,7 @@ func (c *UserController) Post() {
 // @router /:id [get]
 func (c *UserController) GetOne() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetUserById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -109,7 +110,7 @@ func (c *UserController) GetAll() {
 		for _, cond := range strings.Split(v, ",") {
 			kv := strings.SplitN(cond, ":", 2)
 			if len(kv) != 2 {
-				c.Data["json"] = errors.New("invalid query key/value pair")
+				c.Data["json"] = errors.New("Error: invalid query key/value pair")
 				c.ServeJSON()
 				return
 			}
@@ -137,11 +138,14 @@ func (c *UserController) GetAll() {
 // @router /:id [put]
 func (c *UserController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	v := models.User{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateUserById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateUserById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -157,7 +161,7 @@ func (c *UserController) Put() {
 // @router /:id [delete]
 func (c *UserController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteUser(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

@@ -33,10 +33,13 @@ func (c *BookController) URLMapping() {
 // @router / [post]
 func (c *BookController) Post() {
 	var v models.Book
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if _, err := models.AddBook(&v); err == nil {
-		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if _, err := models.AddBook(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -52,7 +55,7 @@ func (c *BookController) Post() {
 // @router /:id [get]
 func (c *BookController) GetOne() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	v, err := models.GetBookById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -135,11 +138,14 @@ func (c *BookController) GetAll() {
 // @router /:id [put]
 func (c *BookController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	v := models.Book{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdateBookById(&v); err == nil {
-		c.Data["json"] = "OK"
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		if err := models.UpdateBookById(&v); err == nil {
+			c.Data["json"] = "OK"
+		} else {
+			c.Data["json"] = err.Error()
+		}
 	} else {
 		c.Data["json"] = err.Error()
 	}
@@ -155,7 +161,7 @@ func (c *BookController) Put() {
 // @router /:id [delete]
 func (c *BookController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
+	id, _ := strconv.Atoi(idStr)
 	if err := models.DeleteBook(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {

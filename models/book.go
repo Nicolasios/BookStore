@@ -10,25 +10,21 @@ import (
 )
 
 type Book struct {
-	Id          int64 `orm:"auto"`
-	BookName    string
-	BookCatalog string
-	BookAvator  string
-	BookPrice   float64 `orm:"digits(10);decimals(2)"`
-	BookUrl     string
-	BookSize    float64 `orm:"digits(10);decimals(2)"`
+	Id          int     `orm:"column(id);auto"`
+	BookName    string  `orm:"column(book_name);size(255)"`
+	BookCatalog string  `orm:"column(book_catalog);size(255)"`
+	BookAvator  string  `orm:"column(book_avator);size(255)"`
+	BookPrice   float64 `orm:"column(book_price);digits(10);decimals(2)"`
+	BookUrl     string  `orm:"column(book_url);size(255)"`
+	BookSize    float64 `orm:"column(book_size);digits(10);decimals(2)"`
+}
+
+func (t *Book) TableName() string {
+	return "book"
 }
 
 func init() {
 	orm.RegisterModel(new(Book))
-}
-
-func (b *Book) TableName() string {
-	return "book"
-}
-
-func (b *Book) TableEngine() string {
-	return "INNODB"
 }
 
 // AddBook insert a new Book into database and returns
@@ -41,10 +37,10 @@ func AddBook(m *Book) (id int64, err error) {
 
 // GetBookById retrieves Book by Id. Returns error if
 // Id doesn't exist
-func GetBookById(id int64) (v *Book, err error) {
+func GetBookById(id int) (v *Book, err error) {
 	o := orm.NewOrm()
 	v = &Book{Id: id}
-	if err = o.QueryTable(new(Book)).Filter("Id", id).RelatedSel().One(v); err == nil {
+	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
@@ -60,7 +56,11 @@ func GetAllBook(query map[string]string, fields []string, sortby []string, order
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -74,7 +74,7 @@ func GetAllBook(query map[string]string, fields []string, sortby []string, order
 				} else if order[i] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("error: invalid order. must be either [asc|desc]")
+					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
@@ -88,21 +88,21 @@ func GetAllBook(query map[string]string, fields []string, sortby []string, order
 				} else if order[0] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("error: invalid order. must be either [asc|desc]")
+					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
 		} else if len(sortby) != len(order) && len(order) != 1 {
-			return nil, errors.New("error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
+			return nil, errors.New("Error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
 		}
 	} else {
 		if len(order) != 0 {
-			return nil, errors.New("error: unused 'order' fields")
+			return nil, errors.New("Error: unused 'order' fields")
 		}
 	}
 
 	var l []Book
-	qs = qs.OrderBy(sortFields...).RelatedSel()
+	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
@@ -141,7 +141,7 @@ func UpdateBookById(m *Book) (err error) {
 
 // DeleteBook deletes Book by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteBook(id int64) (err error) {
+func DeleteBook(id int) (err error) {
 	o := orm.NewOrm()
 	v := Book{Id: id}
 	// ascertain id exists in the database

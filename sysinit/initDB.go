@@ -29,7 +29,7 @@ func InitDB() {
 	// 如果是开发模式， 则显示命令信息
 	isDev := (beego.AppConfig.String("runmode") == "dev")
 	// 非强制模式下自动建表
-	err := orm.RunSyncdb("default", true, isDev)
+	err := orm.RunSyncdb("default", false, isDev)
 	if err != nil {
 		logs.Informational("[orm] Create table err : ", err)
 	}

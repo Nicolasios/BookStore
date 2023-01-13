@@ -5,23 +5,28 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
+
+	"BookStore/utils"
 
 	"github.com/astaxie/beego/orm"
 )
 
 type User struct {
-	Id               int64 `orm:"auto"`
-	UserName         string
-	UserPassword     string
-	UserAuth         int8
-	LastLoginTime    time.Time
-	UserAvator       string
-	UserAge          int8
-	UserGender       int8
-	UserInterests    string
-	UserRegisterTime time.Time `orm:"type(date)"`
-	UserBirthday     time.Time `orm:"type(date)"`
+	Id               int            `orm:"column(id);auto"`
+	UserName         string         `orm:"column(user_name);size(255)"`
+	UserPassword     string         `orm:"column(user_password);size(255)"`
+	UserAuth         int8           `orm:"column(user_auth)"`
+	LastLoginTime    utils.DateTime `orm:"column(last_login_time);type(datetime)"`
+	UserAvator       string         `orm:"column(user_avator);size(255)"`
+	UserAge          int8           `orm:"column(user_age)"`
+	UserGender       int8           `orm:"column(user_gender)"`
+	UserInterests    string         `orm:"column(user_interests);size(255)"`
+	UserRegisterTime utils.Date     `orm:"column(user_register_time);type(date)"`
+	UserBirthday     utils.Date     `orm:"column(user_birthday);type(date)"`
+}
+
+func (t *User) TableName() string {
+	return "user"
 }
 
 func init() {
@@ -33,15 +38,15 @@ func init() {
 func AddUser(m *User) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
-	return id, err
+	return
 }
 
 // GetUserById retrieves User by Id. Returns error if
 // Id doesn't exist
-func GetUserById(id int64) (v *User, err error) {
+func GetUserById(id int) (v *User, err error) {
 	o := orm.NewOrm()
 	v = &User{Id: id}
-	if err = o.QueryTable(new(User)).Filter("Id", id).RelatedSel().One(v); err == nil {
+	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
@@ -57,7 +62,11 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
 		k = strings.Replace(k, ".", "__", -1)
-		qs = qs.Filter(k, v)
+		if strings.Contains(k, "isnull") {
+			qs = qs.Filter(k, (v == "true" || v == "1"))
+		} else {
+			qs = qs.Filter(k, v)
+		}
 	}
 	// order by:
 	var sortFields []string
@@ -71,7 +80,7 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 				} else if order[i] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("nvalid order. must be either [asc|desc]")
+					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
@@ -85,21 +94,21 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 				} else if order[0] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("error: invalid order. Must be either [asc|desc]")
+					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
 		} else if len(sortby) != len(order) && len(order) != 1 {
-			return nil, errors.New("error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
+			return nil, errors.New("Error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
 		}
 	} else {
 		if len(order) != 0 {
-			return nil, errors.New("error: unused 'order' fields")
+			return nil, errors.New("Error: unused 'order' fields")
 		}
 	}
 
 	var l []User
-	qs = qs.OrderBy(sortFields...).RelatedSel()
+	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
@@ -138,7 +147,7 @@ func UpdateUserById(m *User) (err error) {
 
 // DeleteUser deletes User by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteUser(id int64) (err error) {
+func DeleteUser(id int) (err error) {
 	o := orm.NewOrm()
 	v := User{Id: id}
 	// ascertain id exists in the database

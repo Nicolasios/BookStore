@@ -15,6 +15,179 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/book-catalog/": {
+            "get": {
+                "tags": [
+                    "book-catalog"
+                ],
+                "description": "get BookCatalog",
+                "operationId": "BookCatalogController.Get All",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "query",
+                        "description": "Filter. e.g. col1:v1,col2:v2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "description": "Fields returned. e.g. col1,col2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortby",
+                        "description": "Sorted-by fields. e.g. col1,col2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "description": "Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "description": "Limit the size of result set. Must be an integer",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "description": "Start position of result set. Must be an integer",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.BookCatalog"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "book-catalog"
+                ],
+                "description": "create BookCatalog",
+                "operationId": "BookCatalogController.Post",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for BookCatalog content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BookCatalog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "{int} models.BookCatalog"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/book-catalog/{id}": {
+            "get": {
+                "tags": [
+                    "book-catalog"
+                ],
+                "description": "get BookCatalog by id",
+                "operationId": "BookCatalogController.Get One",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.BookCatalog"
+                        }
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "book-catalog"
+                ],
+                "description": "update the BookCatalog",
+                "operationId": "BookCatalogController.Put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id you want to update",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for BookCatalog content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BookCatalog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.BookCatalog"
+                        }
+                    },
+                    "403": {
+                        "description": ":id is not int"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "book-catalog"
+                ],
+                "description": "delete the BookCatalog",
+                "operationId": "BookCatalogController.Delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id you want to delete",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} delete success!"
+                    },
+                    "403": {
+                        "description": "id is empty"
+                    }
+                }
+            }
+        },
         "/book/": {
             "get": {
                 "tags": [
@@ -393,6 +566,19 @@
                 }
             }
         },
+        "models.BookCatalog": {
+            "title": "BookCatalog",
+            "type": "object",
+            "properties": {
+                "CatalogType": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
         "models.User": {
             "title": "User",
             "type": "object",
@@ -402,7 +588,7 @@
                     "format": "int64"
                 },
                 "LastLoginTime": {
-                    "type": "string"
+                    "$ref": "#/definitions/utils.DateTime"
                 },
                 "UserAge": {
                     "type": "integer",
@@ -416,7 +602,7 @@
                     "type": "string"
                 },
                 "UserBirthday": {
-                    "type": "string"
+                    "$ref": "#/definitions/utils.Date"
                 },
                 "UserGender": {
                     "type": "integer",
@@ -432,9 +618,17 @@
                     "type": "string"
                 },
                 "UserRegisterTime": {
-                    "type": "string"
+                    "$ref": "#/definitions/utils.Date"
                 }
             }
+        },
+        "utils.Date": {
+            "title": "Date",
+            "type": "object"
+        },
+        "utils.DateTime": {
+            "title": "DateTime",
+            "type": "object"
         }
     },
     "tags": [
@@ -445,6 +639,10 @@
         {
             "name": "book",
             "description": "BookController operations for Book\n"
+        },
+        {
+            "name": "book-catalog",
+            "description": "BookCatalogController operations for BookCatalog\n"
         }
     ]
 }

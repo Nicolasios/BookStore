@@ -4,6 +4,9 @@ import (
 	_ "BookStore/routers"
 	"BookStore/sysinit"
 
+	c "github.com/TreyBastian/colourize"
+
+	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/astaxie/beego"
@@ -19,6 +22,9 @@ func init() {
 }
 
 func main() {
+	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"logs/mylog.log","separate":["error","mergency","info"]}`) //日志分类输出到各个文件
+
+	logs.Info(c.Colourize("begin beego framework", c.Black, c.Whitebg, c.Bold))
 	if beego.BConfig.RunMode == "dev" {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
